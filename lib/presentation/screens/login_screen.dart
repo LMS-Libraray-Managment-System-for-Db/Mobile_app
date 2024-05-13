@@ -1,16 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_router.dart';
+import '../../constants/cache_helper.dart';
 import '../../constants/colors.dart';
 import '../../constants/strings.dart';
 import '../../constants/variables.dart';
 import '../../data/models/auth_models.dart';
+import '../../data/web_services/api_service.dart';
 import '../../data/web_services/auth_service.dart';
 import '../widgets/app_buttons.dart';
-import '../widgets/or_divider.dart';
 import '../widgets/text_field_widget.dart';
 import 'home_screen_test.dart';
 
@@ -39,7 +40,7 @@ class LoginScreen extends StatelessWidget {
                     height: imageHeight,
                     width: imageWidth,
                     image: AssetImage(
-                      'assets/images/Smart home-bro.png',
+                      'assets/images/Book lover-pana.png',
                     )),
                 const SizedBox(
                   height: 5,
@@ -49,7 +50,7 @@ class LoginScreen extends StatelessWidget {
                     Text(
                       'Login',
                       style: TextStyle(
-                          color: AppColors.highligtedTextColor,
+                          color: Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.w900),
                     ),
@@ -97,7 +98,7 @@ class LoginScreen extends StatelessWidget {
                           Text(
                             'Forgot your password?',
                             style: TextStyle(
-                              color: AppColors.highligtedTextColor,
+                              color: AppColors.mainButtonsColor,
                             ),
                           ),
                         ],
@@ -112,17 +113,37 @@ class LoginScreen extends StatelessWidget {
                   height: sizedBoxHeightSize,
                 ),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     LoginModel data = LoginModel(
                       email: emailController.text,
                       password: passwordController.text,
                     );
-                    ApiServices(prefs: prefs).signinPostRequest(data);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreenTest(),
-                      ),
+
+                    final Either<String, Response> result =
+                        await ApiService().signinPostRequest(data.toJson());
+
+                    result.fold(
+                      (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(error),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                      (response) {
+                        // Save access token to SharedPreferences
+                        final accessToken = response.data['token'];
+                        CacheHelper.saveData('access_token', accessToken);
+
+                        // Handle successful response
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreenTest(),
+                          ),
+                        );
+                      },
                     );
                   },
                   child: MainAppButtons(
@@ -130,31 +151,18 @@ class LoginScreen extends StatelessWidget {
                     borderColor: AppColors.mainButtonsBorderColor,
                     text: 'Sign in',
                     textColor: AppColors.mainButtonsTextColor,
-                    key: key,
                   ),
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                const OrDivider(),
-                const SizedBox(
-                  height: 15,
-                ),
-                MainAppButtons(
-                    heightSize: 50,
-                    textColor: Colors.black,
-                    buttonColor: AppColors.backgroundColor,
-                    borderColor: AppColors.highligtedTextColor,
-                    text: 'Continue with Google',
-                    isIcon: true,
-                    icon: 'assets/icons/google.png'),
                 const SizedBox(
                   height: 15,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account?"),
+                    const Text("Don't have an account?",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () {
@@ -162,7 +170,7 @@ class LoginScreen extends StatelessWidget {
                       },
                       child: const Text(
                         "Sign Up",
-                        style: TextStyle(color: AppColors.highligtedTextColor),
+                        style: TextStyle(color: AppColors.mainButtonsColor),
                       ),
                     ),
                   ],

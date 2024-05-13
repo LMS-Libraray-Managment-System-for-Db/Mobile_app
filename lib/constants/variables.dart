@@ -1,5 +1,5 @@
-const double imageHeight = 250;
-const double imageWidth = 300;
+const double imageHeight = 300;
+const double imageWidth = 350;
 
 const double highligtedTextSize = 25;
 

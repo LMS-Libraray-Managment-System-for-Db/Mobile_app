@@ -12,5 +12,6 @@ class AppRouter {
       case signUpScreen:
         return MaterialPageRoute(builder: (_) => SignupScreen());
     }
+    return null;
   }
 }

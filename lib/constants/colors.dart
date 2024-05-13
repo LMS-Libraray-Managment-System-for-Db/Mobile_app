@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const Color highligtedTextColor = Colors.black;
-  static Color backgroundColor = Colors.grey.shade100;
+  static Color backgroundColor = Colors.black;
   static Color textFieldColor = Colors.grey.shade300;
   static const Color textFieldTextColor = Colors.grey;
   static const Color textTypingColor = Colors.black;
